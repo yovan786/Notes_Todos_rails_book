@@ -1,0 +1,28 @@
+1. Make small notes about how to install ROR on PC, using Ruby installer only.
+2. Can we use ROR without internet connection.
+3. Learn to use vim and install additional package to run Ruby.
+4. Maybe already have a tutorial on vim.
+5. Install vim in ST3.
+6. Learn Git commands and see how to use it with ST3.
+7. Create a Heroku account to deploy application for free. See the heroku documentation if required.
+8. Get the different versions of the http://railstutorial.org/book
+9. Visit ROR-powered websites:
+	- shopify.com
+	- scribd.com
+	- twitter.com
+	- hulu.com
+	- yp.com
+	- 37signals.com [basecamphq.com and campfirenow.com]
+10. Download the source code from the git account of Michael Hartl
+11. How to run a migration on Bitmani's redmine.
+12. Go the the http://railstutorial.org/book to get the author's .gitignore file and compare it with Bitnami Redmine.
+13. See how we can get the prompt [first_app (master)]> in cmd when we have commited on git.
+14. How to change branches in both cmd and ST3.
+15. Learn markdown language to build nice README
+16. What is the difference between git commit -m "message" and git commit -am "message"
+17. Install spork and autotest on windows to speed up Rspec.
+18. Running command prompts in tabs
+19. See why we use require 'spec_helper' in our tests. And where else we use require.
+20. Check if helpers are available in any views.
+21. Look at the Ruby and ROR apis for the documentation.
+22. What is the difference between mocks, integration testing, e2e, etc. See all ways to test data

@@ -1,0 +1,502 @@
+1. To create a new app and start it in development: 
+rails new first_app
+gem install bundle
+cd first_app
+bundle install
+rails s -p8080
+
+Note: sqllite-ruby is the DB adapter which tells ROR how to talk to the SQLlite database.
+
+2. As we already have our code on git, we can deploy our application easily on Heroku.
+gem install heroku
+heroku keys:add -> Done only once. This adds our public key to Heroku.
+heroku create -> This creates a default website for us Example stark-sunset-54.heroku.com. In our folder if we edit the .git/config file, we can see that heroku create command automatically configured git to push to heroku.
+git push heroku master -> If we refresh we can see our app has been deployed to heroku.
+heroku rename yjuggoo -> To rename our domain name to yjuggoo.heroku.com
+
+3. Scaffolding technique is an easy way to make a DEMO app.
+rails new demo_app
+cd demo_app
+bundle install
+edit the .gitignore file and change it to the version on railstutorial.org website
+git init
+git add .
+git status
+git commit -m "Initial commit"
+create a repository on git
+git remote add origin git@github.com:yovan-juggoo-ruby/demo_app.git
+git push origin master
+add yovan-juggoo as a collaborator
+modify README using markdown language
+git mv README README.markdown && git commit -am "Improved the README"
+git push
+
+users
+	id: integer
+	name: string
+	email: string
+
+microposts
+	id: integer
+	content: string
+	user_id: integer
+
+users and microposts are considered as resources. This means that we can perform CRUD operations on them using http.
+
+ To quickly generate a working resource: 
+ rails generate scaffold User name:string email:string
+ To prepare the database: 
+ rake db:migrate
+ git status -> to know the status of our files
+ As we can see config/routes.rb already existed and has been modified as we ran the rails generate scaffold command. We also have several new files that have been created by the command.
+
+We will commit these changes to github.
+git add .
+git commit -m "Created a Users resource"
+git status
+
+Browser --> /users --> rails router --> index action --> users_controller.rb (Controller) --> User.all called by controller --> user.rb (Model) --> DB --> Model --> result to controller --> @users --> index.html.erb --> rendered HTML ---> Controller --> Browser
+
+routes.rb
+----------
+resources :users creates a bunch of routes
+
+users_controller.rb
+--------------------
+We clean up the index action method by removing the respond_to lines. The index method sets @users attribute to contain all the users. The @users attribute (instance variable) is automatically available in the view, i.e users/index.html.erb
+
+We can see that there is nothing in the model user.rb. This means that we get much for free going on.
+The User model inherits from the ActiveRecord::Base class.
+all is found in the ActiveRecord:Base classe, which returns
+all the records for the entity.
+
+The data is passed to the view using @users and the view renders the dynamic data in HTML to the controller and controller to browser.
+
+Http request	URL				Action 		Purpose
+===================================================================
+GET 			/users 			index 		page to list all users
+GET 			/users/1 		show		page to show user with id 1
+GET  			/users/new 		new			page to make a new user
+POST  			/users 			create		create a new user
+GET  			/users/1/edit 	edit		page to edit user 1
+PUT  			/users/1 		update		update user with id 1
+DELETE  		/users/1 		destroy		delete user with id 1
+
+In the routes table, the line resources :users creates the routes above.
+
+Note: Web forms can only submit POST requests but when we update a user, rails simulates a PUT request to the server.
+If we view the source code while editing a user we can see that the form action="/users/4" and method="POST"
+Same goes for the DELETE request.
+We can see that rails uses REST.
+On deleting, creating and editing a user we have a flash message on the screen.
+There is no validation, authentication, authorization, styling in the scaffold app.
+
+rails generate scaffold Micropost content:string user_id:integer
+rake db:migrate
+
+As we only want to commit the changes we did on the Users resource, we have to undo the scaffolding of the Microposts and the rake db:migrate.
+
+rake db:rollback
+rails destroy scaffold Micropost
+git status -> Only the Users resource files have been modified
+git commit -am "Simplified the Users controller"
+rails generate scaffold Micropost content:string user_id:integer
+rake db:migrate
+git status
+git commit -am "Added the Microposts resource"
+
+Navigate to /microposts and do the same stuff as we did with the Users resource
+Note we have a User input where we input the user id.
+
+In the routes.rb file we can see that rails has added resource :micropost - added the different routes for the Microposts resource.
+We don't have a validation on the length of the content of our microposts, nor the relationship one-to-many between user-microposts.
+- We put validations in our model classes.
+For example:
+
+class Micropost < ActiveRecord::Base
+	belongs_to :user
+	validates :content, :length => {:maximum => 140}
+end
+
+class User < ActiveRecord::Base
+	has_many :microposts
+end
+
+If the length contstraint is not respected, we get an error message which is displayed in our view.
+
+To view the relationships between user-microposts we use the rails console:
+rails console or rails c
+The rails console loads in the development environment
+> User.all returns the array of users.
+> user = User.first
+> user.name -> Gives the name
+> user.email
+> user.microposts -> returns an array of microposts associated with the user
+> user = User.find(3)
+> micropost = Micropost.first
+> name = Micropost.last.user.name
+> micropost.user == user -> To compare if they are the same user
+
+A model inherits from ActiveRecord::Base and hence each model inherits methods that they execute like User.all
+It can automatically detect the columns in our database and automatically created attributes for the model.
+
+Our controllers inherit from ApplicationController which inherits from ActionController::Base.
+ActionController::Base contains a lot of functionality - redirection to URLs, knowing the request URL etc.
+The main reason for our controllers inheriting from the intermediate ApplicationController is that we can add some global functionnality to all our controllers. This functionnality can be added in the ApplicationController at one place.
+
+git status
+git commit -am "Finished the demo app"
+git push
+heroku create --> To create a new default application
+git push heroku master
+We will get an error as heroku needs the datamodel. Heroku runs postgresql in production.
+heroku rake db:migrate runs the db:migrate gem
+
+sample_app
+===========
+By default rails uses TestUnit for testing, but we will use RSpec. We must suppress the creation of the default test directory.
+rails new sample_app -T
+cd sample_app
+We must install RSpec. In the Gemfile we must add the following lines:
+
+group :test, :development do
+  gem "rspec-rails", "~> 2.8"
+end
+
+bundle install
+Before modifying our .gitignore file, we must generate some rspec related files:
+rails generate rspec:install
+Modify the .gitignore file as in the railstutorial.org/book
+git init
+git add.
+git commit -m "Initial commit"
+create a github repo for the project called sample_app
+git remote add origin git@github.com:yovan-juggoo-ruby/sample_app.git
+git push origin master
+add yovan-juggoo as a collaborator
+modify README using markdown language
+git mv README README.markdown && git commit -am "Improved the README"
+git push
+heroku create 
+git push heroku master
+
+We want to create some static pages (home, contact, about, etc). We need a controller to manage our static pages:
+We will generate the Pages controller with two actions: home and contact
+
+rails generate controller Pages home contact 
+
+This will modify our routes.rb  file, create the pages_controller.rb, create our views, create our pages_helper.rb and generate rspec files for the controller, views and helper class.
+Open the routes.rb and we can see the two lines
+get "pages/home"
+get "pages/contact"
+We can navigate to the home page: http:localhost:3000/pages/home and view the static content of the app/views/pages/home.html.erb view. Same goes for the contact page.
+
+git status
+git add .
+git commit -m "Added a Pages controller"
+We will use automated TDD - writing the test before writing the application code.
+We will test for the presence of an about page
+First we remove the tests for our views and helpers. We will do these tests in the controllers test.
+git rm -r spec/views
+git rm -r spec/helpers
+ls spec -> spec_helper.rb (file used by rspec ro run) and the controllers/pages_controller_spec.rb
+We can run the spec directory for all of our tests(here we have one only).
+rspec spec/ -> We must wait for long but we are finally green
+The overhead for running our tests is because of the loading of the RSpec environment in memory. Spork can be used to speed RSpec.
+Run spork in a separate terminal
+rspec spec/ in another terminal -> Tests are dramatically speed up.
+Now instead of running rspec spec/, we will use autotest which gives us a desktop notification on the status of our tests - growl notification.
+Note: We have 4 terminals:
+ - the first to issue commands
+ - second for autotest
+ - third for spork
+ - forth for running the server
+We will write a failing test for our about page - it does not exist. First of all we will open up the pages_controller_spec.rb file. All here is pure ruby. Rspec exploits Ruby to make a domain specific language (DSL).
+
+require 'spec_helper'
+describe PagesController do
+	... Other tests
+	describe "GET about" do
+		it "should be successful" do
+			get 'about' -> First we make an http get for the about ACTION get :about
+			response.should be_success -> Success should be our response code for our get
+		end
+	end
+end
+
+On saving the file, autotests fails. 
+Sometimes we have to restart Spork. Stop autotest, start spork and start autotest.
+We have to
+1. Create a route for the about page in routes.rb
+2. Create the about action in our Pages controller
+3. Create the pages/about.html.erb
+4. Finally test in the browser: http://localhost:3000/pages/about
+
+Tests are important
+1. To modify code and test if it did not break previous code
+2. To refactor code, i.e change functionality of some code but not its definition.
+
+We will create dynamic pages - Dynamic title for each page.
+
+it "should have the right title" do
+	get :home
+	response.should have_selector("title", :content => "Ruby on Rails Sample App | home")
+end
+
+have_selector is used to test HTML tags. The test above will fail - title in views/layouts/application.html.erb is SampleApp.
+
+1. Edit the home.html.erb file by adding the doctype, head with the title, and the already existing code.
+2. Autotest will still fail. We have removed the tests on our views and are trying to test the view in our pages_controller_spec.rb file. By default this test suite will not render the views. We have to use the method render_views in our controller spec before running any view related tests.
+3. Our test should pass now
+4. We do the same test for the other views
+5. We will modify the views html so that it is more meaningful.
+6. But as we can see we have the title still showing SampleApp in the browser.
+7. rm views/layouts/application.html.erb 
+8. We can see that the titles are right for the pages but there is duplication of HTML code. We will add dynamic content to our views also.
+9. In the actions add an instance @title="Home" and embed the title in our home view <%= title%>. Do the same for the other views. Our tests should still work.
+10. We restore the default application view, change its title and remove unnecessary HTML in our views. But in our browser we will get empty pages: Blank space.
+11. We will test that our HTML has a non-blank body by using regular expressions - use rubular. We want to match empty or blank body -> <body></body> or <body>   <body>
+=> /<body>\s*<\/body>/ => 0 or any number of white space
+ 
+ it "should have a non-blank body" do
+ 	get :home
+ 	response.body.should_not =~ /<body>\s*<\/body>/   -> response.body is the whole rendered HTML
+end
+
+12. We still are red. We must add embedded ruby: <%= yield%>. Now we don't have errors.
+13. Add the csrf_meta_tag for cross request site forgery.
+14. 
+git status
+git add .
+git commit -am "added a site layout"
+it push
+git push heroku master
+heroku open to view in browser
+
+If server down we have to run the 3 commmands each in a new terminal window.
+rails s
+spork
+autotest
+We want a global title that we will specialise. A possible way to do this is by using a helper.
+Note: All helpers in the helpers folder are available in any view. 
+
+module ApplicationHelper
+	# Return a title on a per-page basis.
+	def title
+		base_title = "Ruby on Rails Tutorial Sample App"
+		if @title.nil? #By default @title being an instance variable is nil
+			base_title #methods return the last line evaluated
+		else
+			"#{base_title} | # {@title}"
+		end
+	end
+end
+
+1. Change the title in application.html.erb to <%= title%> and check in browser
+2. git status 
+git commit -am "Added a title helper"
+3. We sill use blueprint framework to create a base for our styling.
+copy the blueprint folder in the zipped file in the public/stylesheets folder
+4. Add the following lines to the appication.html.erb file
+<%= stylesheet_link_tag 'blueprint/screen', :media => 'screen' %>
+<%= stylesheet_link_tag 'blueprint/print', :media => 'print' %>
+
+stylesheet_link_tag is a rails funtion that takes a string and a hash as arguments.
+stylesheet_link_tag('blueprint/screen', { :media => 'screen' })
+
+The above is rendered as
+<link rel="stylesheet" type="text/css" media="screen" href="/stylesheets/blueprint/screen.css?1280830757"/>
+The 1280830757 is there so that the page reloads the file if it changes (the number changes) - as normally browsers cache these files.
+
+We will use the rails console to run some code.
+rails c or rails console. The rails console is irb with access to rails components (controllers, helpers, database, etc).
+
+1. "foo".concat("bar")
+2. first_name = "Yovan" -> This returns the string literral "Yovan"
+3. "#{first_name} #{last_name}" -> This is called interpolation
+4. puts returns nil
+5. print returns nil
+6. "foobar".length
+7. "foobar".empty?
+8. "".empty? is true
+9. "foobar".blank? not Ruby specific but rails specific. Useful in forms.
+10. puts "Both strings are empty"  if x.empty? || y.empty?
+11. if x.empty? || y.empty?
+		puts "Both strings are empty"
+	end
+12. nil.empty? -> NoMethod error
+13. nil.to_s.empty? -> true -> nil.to_s = ""
+=> "#{nil}" => ""
+14. false, true and nil are boolean values. "", 0 are not false but truthy values.
+15. !!0, !![], !!"" returns true
+16. ApplicationHelper is a module, hence gets included in the controller's class.
+17. "foo bar    baz".split -> ["foo", bar, baz] is an array of strings splitted on a whitespace.
+"fooxxxbarxxxbax".split("xxx")
+18. a = [10, 20, 30, 40]
+a[-1] = 40
+a.last
+a.second = 20 -> rails not ruby
+a.length
+a.empty
+a.sort
+a.sort!
+a.reverse
+a.reverse!
+a.shuffle
+a.shuffle!
+(1..52).to_a.shuffle
+[1, 2] << 3 -> [1,2,3] #push operator
+[1,2,"test"] << (1..5) -> [1,2,"test", 1..5]
+arrays are Enumerable. Enumerable is a module in ruby where we can iterate on each element.
+(1..5).each {|i| puts 2 ** 1} -> 2 4, 8, 16, 32 printed on the screen.
+
+a = []
+(1..5).each{ |i| a << 2 ** i}
+a -> returns [2 4, 8, 16, 32]
+
+It is better to use a map
+a = [];
+(1..5).map {|i| a << 2 ** i} -> returns [2 4, 8, 16, 32]
+
+The same in one line: a = (1..5).map {|i| 2 ** i}
+or (1..5).map do |i|
+		2 ** i
+	end
+
+10.times do --> Here we don't need the i argument
+	puts "Betulgeuse"
+end
+
+Where we see the keyword do, we are using a block. For example in our tests and in the Gemfile.
+%w[foo bar baz] -> ["foo bar baz"]
+%(a b c) -> "abc"
+b = %w[foo bar a b c].map {|string| string.upcase} -> ["FOO", "BAR", "A", "B", "C"]
+%w[a b c].map(&:upcase) -> ["A", "B", "C"]
+
+"foo".class -> String
+:foo.class -> Symbol
+user = {}
+user.class -> Hash
+Arrays are indexed by integers but hashes can use more generic data-type.
+user["first_name"] = "Yovan"
+user["last_name"] = "Juggoo"
+user -> {"first_name" => "Yovan", "last_name" => "Juggoo"}
+user["first_name"] -> "Yovan"
+user[12] = "Hello"
+user -> {"first_name" => "Yovan", "last_name" => "Juggoo", 17 => "Hello"}
+Hashes don't have an order on rails 3 compared to arrays which have an order
+Hashes are key value pairs. The order is not important. What is important is that for every key there is a corresponding value.
+employee = { "role" => "manager", "department" => "Programming", "name" => "John Doe", "salary" => 98500 }
+In Rails application and in general in Ruby we use symbols as keys, not strings.
+Symbols are more efficient for comparision than strings. "test" == "Test". Here comparison is done one character at a time. Symbols comparison are done on one go.
+
+flash = { :success => "It worked!", ":error" => "It failed"}
+flash.each do |key, value|
+	puts "Key: #{key.inspect}  \nValue #"{value.inspect}"
+end
+
+key.inspect is important cause key only will be interpolated as a string => key.to_s
+puts [1, 2 ,3] prints all the elemets one by one
+puts [1, 2, 3].inspect puts the array to the console
+puts [1, 2, 3].inspect is same as p [1, 2, 3]
+
+s = String.new("my_string")
+a = Array.new([1, 2, 3])
+h = new Hash -> We don't initialise it. This returns {}
+h[:name] = "Yovan Juggoo"
+h -> {:name => "Yovan Juggoo"}
+s.class.superclass -> Object
+s.class.superclass.superclass -> BasicObject
+s.class.superclass.superclass.superclass
+
+class Word
+	def palindrome? string
+		string == string reverse
+	end
+end
+w = Word.new
+w.palindrome('foobar') -> false
+w.palindrome('level') -> true
+
+reset the console
+
+class Word < String
+	def palindrome?
+		self == self.reverse
+	end
+end
+
+w= Word.new('deified')
+w.class -> Word
+w.palindrome? -> true
+
+We will add the palindrome? method directly on the String class
+
+class String
+	def palindrome?
+		self == reverse
+	end
+end
+
+"deified".palindrome?
+
+We can load our pages controller in our console
+pages = PagesController.new
+pages.home -> "Home"
+
+A ruby class - for testing purposes
+class User
+	attr_acessor :name, :email
+
+	def initialize (attributes = {})
+		@name = attributes[:name]
+		@email = attributes[:email]
+	end
+
+	def formatted_email
+		"#{@email} <#{@email}>"
+	end
+end
+
+To use this code in our console, we must require it.
+require './user'
+user = User.new(:name => "Yovan Juggoo", :email => "yovan.juggoo@gmail.com")
+user.email #getter
+user.email = "yovan.juggoo.ruby@gmail.com" #setter
+
+Nested hash - hash having a hash as a key
+params = {}
+params[:user] = {:name => "Yovan Juggoo", :email => "yovan.juggoo@gmail.com"}
+params -> {:user => {:name => "Yovan Juggoo", :email => "yovan.juggoo@gmail.com"}}
+user = User.new(params[:user])
+
+We will refactor our pages_controller_spec.rb file:
+require 'spec_helper'
+describe PagesController do
+	render_views
+	
+	before(:each) do
+		@base_title  = "Ruby on Rails Tutorial Sample App" #@base_title should be an instance variable
+	end
+
+	describe "GET home" do
+		it "should be successful" do
+			get "home"
+			response.should be_success
+		end
+
+		it "should have the right title" do
+			get "home"
+			response.should have_selector("title", :content => "#{@base_title} | Home")
+		end
+
+	end
+	... Other tests
+end
+
+git status
+git add .
+git commit -m "Added helper and stylesheet"
+git push
+git push heroku
+heroku open

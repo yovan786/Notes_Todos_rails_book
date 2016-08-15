@@ -1,0 +1,73 @@
+1. First get the .gitignore file in place.
+
+/.bundle
+/db/*.sqlite3
+/log/*.log
+/tmp
+
+2. git init -> To initialize it
+
+3. git add . -> add all the files in the current directory
+
+4. git status -> To view the status of all files
+
+5. git commit -m "Initial commit"
+
+6. git log -> To view the logs and we can see the Initial commit message
+
+7. git push origin master-> To push to remote repository - Not yet implemented - Use github
+Note: origin is github i the master branch
+
+8. github
+	a. Login as sec_account. Primary account is yovan.juggoo@gmail.com. Secondary account is yovan.juggoo.ruby@gmail.com.
+	b. Create a new repository on git
+	c. Configure userName and userEmail on PC
+	git config --global user.name "Yovan Juggoo"
+	git config --global user.email "yovan.juggoo@gmail.com"
+	Install public key for the primary github account
+	d. Add README if not present
+	git add README
+	e. Commit the README
+	git commit -m "Commited the README"
+	git remote add origin git@github.com:yovan-juggoo-ruby/first_app.git
+	f. git push origin master
+	This comand will raise an error as github is associated with the secondary account and we want the primary account to commit. Go to the admin area and  add yovan-juggoo as a collaborator and PUSH to github.
+
+9. To create a new branch called modify-README, for example to re-modify the README
+git checkout -b modify-README
+This should give us a new branch and in the command prompt we should see
+[first_app (modify-README)]$
+
+10. We are using a branch. Suppose we deleted the app folder by accident and we want to revert back. Note we have not commited.
+rm -rf app/
+git status tells us the files we deleted - "Changed but not updated"
+git checkout --force or git checkout -f restores our code
+We can also use git reset --hard HEAD
+
+11. Now suppose we made stupid changes like deleting the app folder, and commited the changes of the branch. 
+rm -rf app/
+git commit -am "Stupid changes" -> Commit all with a message
+
+We are still using the modify-README branch. So the best is to switch back to the untouched master and delete the modify-README branch.
+git checkout master -> We changed the current branch to master.
+git branch -D modify-README -> Deletes the branch
+
+12. We are on the master branch. We create a new branch modify-README, modify the README file using markdown and move the README file to README.markdown. We then commit the modified file in our branch.
+git checkout -b modify-README
+change the file
+git mv README README.markdown
+git commit -am "Improved the README" -> This will delete the README and create a README.markdown file in our new branch.
+
+13. To merge our branch with the master, we must first switch to the master and then merge our branch.
+git checkout master -> Switch to the master branch
+git merge modify-README -> To merge our branch with the master
+git log
+git status -> "On branch master nothing to commit" appears
+As we can see in the logs we will have two messages: "Initial commit" and "Improved the README"
+
+14. We are still on the master. We use git push instead of git push origin master, as we are on the master itself.
+
+15. As we don't have any changes to commit in our modify-README branch, we can delete it.
+git branch -d modify-README -> Deletes the branch. 
+
+There is a difference between git branch -d modify-README and git branch -D modify-README. If we did had some uncommited changes, git would have complained.
