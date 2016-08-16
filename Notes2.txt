@@ -1,7 +1,7 @@
 sample_app
 ===========
 By default rails uses TestUnit for testing, but we will use RSpec. We must suppress the creation of the default test directory.
-rails new sample_app -T
+rails new sample_app -T -d mysql
 cd sample_app
 We must install RSpec. In the Gemfile we must add the following lines:
 

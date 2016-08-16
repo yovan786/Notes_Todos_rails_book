@@ -1,1 +1,0 @@
-This README was edited by Yovan Juggoo.
