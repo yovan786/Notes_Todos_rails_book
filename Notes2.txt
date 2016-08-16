@@ -90,6 +90,9 @@ it "should have the right title" do
 end
 
 have_selector is used to test HTML tags. The test above will fail - title in views/layouts/application.html.erb is SampleApp.
+For this to work we must add the webrat gem to our Gemfile as have_selector is a webrat method:
+gem 'webrat'
+bundle install
 
 1. Edit the home.html.erb file by adding the doctype, head with the title, and the already existing code.
 2. Autotest will still fail. We have removed the tests on our views and are trying to test the view in our pages_controller_spec.rb file. By default this test suite will not render the views. We have to use the method render_views in our controller spec before running any view related tests.
