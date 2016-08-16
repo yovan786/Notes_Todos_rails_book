@@ -355,3 +355,16 @@ Chapter 5 - Begin with ruby_0502.flv
 --------------------------------------
 As we will be making a large number of changes, we will create and work on a new branch of the master branch.
 git checkout -b filling-in-layout
+
+We will format our page as in mockup.png. The main page to be formatted is layouts/application.html.erb
+
+- The HTML5 Shiv enables use of HTML5 sectioning elements in legacy Internet Explorer and provides basic HTML5 styling for Internet Explorer 6-9, Safari 4.x (and iPhone 3.x), and Firefox 3.x.
+- We added also support for IE < 8 
+- We added our custom stylesheet.
+- blueprint expects that the content is placed in a container class.
+
+image_tag (path, alt, class) is a helper method.
+<%= image_tag("logo.png", :alt => "Sample App", :class => "round")%>
+is rendered to : <img alt="Sample App" class="round" src="/assets/logo.png" />
+
+Note here we are using '#' to stub the URL, but later we will use named routes.
