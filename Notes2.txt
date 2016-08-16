@@ -324,7 +324,7 @@ require 'spec_helper'
 describe PagesController do
 	render_views
 	
-	before(:each) do
+	before(:each) do -> runs the same code before running each example (test bloc)
 		@base_title  = "Ruby on Rails Tutorial Sample App" #@base_title should be an instance variable
 	end
 
@@ -349,3 +349,9 @@ git commit -m "Added helper and stylesheet"
 git push
 git push heroku
 heroku open
+
+
+Chapter 5 - Begin with ruby_0502.flv
+--------------------------------------
+As we will be making a large number of changes, we will create and work on a new branch of the master branch.
+git checkout -b filling-in-layout
