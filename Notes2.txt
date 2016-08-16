@@ -186,7 +186,7 @@ a[-1] = 40
 a.last
 a.second = 20 -> rails not ruby
 a.length
-a.empty
+a.empty?
 a.sort
 a.sort!
 a.reverse
@@ -218,7 +218,7 @@ end
 
 Where we see the keyword do, we are using a block. For example in our tests and in the Gemfile.
 %w[foo bar baz] -> ["foo bar baz"]
-%(a b c) -> "abc"
+%(a b c) -> "a b c"
 b = %w[foo bar a b c].map {|string| string.upcase} -> ["FOO", "BAR", "A", "B", "C"]
 %w[a b c].map(&:upcase) -> ["A", "B", "C"]
 
@@ -251,7 +251,7 @@ puts [1, 2, 3].inspect is same as p [1, 2, 3]
 
 s = String.new("my_string")
 a = Array.new([1, 2, 3])
-h = new Hash -> We don't initialise it. This returns {}
+h = Hash.new -> We don't initialise it. This returns {}
 h[:name] = "Yovan Juggoo"
 h -> {:name => "Yovan Juggoo"}
 s.class.superclass -> Object
