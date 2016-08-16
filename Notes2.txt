@@ -409,5 +409,21 @@ Same goes for /about, /help.
 / is particular.  root :to => 'pages#home'
 Note: You can have the root of your site routed with "root". Just remember to delete public/index.html.
 We can now delete the get "pages/about", etc and use the match method.
+In the header partial, we will link out logo to the home page. We will use a helper logo to get the image.
 
+Note: Suppose we have some uncommited changes. We want to append these changes to our last commit.
+git add .
+git commit --amend -> This will open the git editor. We can close it. The uncommited changes have been amended to the last commit.
+git log -p -> The changes that were made.
+
+A sign up creates a new user -> A UserController having a new action to create a new user.
+rails g controller Users new
+rm -rf spec/helpers && rm -rf spec/views -> These don't form part of git, but we dont need them either.
+
+BDD testing for the title for the new action: "Sign up".
+We would like to be redirected at the /users/new page with /signup
+As previously, we use integration testing to map and test our signup_path.
+
+Note: Integration testing is mostly used to after the work has been done - to double check.
+For example we can test our links.
 
