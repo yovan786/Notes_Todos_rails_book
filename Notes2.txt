@@ -371,3 +371,43 @@ We have link_to methods for rendering our navigation.
 Note here we are using '#' to stub the URL, but later we will use named routes.
 
 The main content goes into a section tag.
+
+We add our custom styles in custom.css to make the page more appealing.
+
+Soon we can see that the application.html.erb file is becoming cluttered in the head of the HTML document. We will use a partial for stylesheets. In the layouts folder we will create an _stylesheets.html.erb partial.
+We use the render helper method to include our partial.
+<%= render 'layouts/stylesheets'> -> rails recognises partials by their name beginning with an underscore, but we use them in our layouts without the '_'.
+
+We did same with the header and the footer. Note: for remote resources, we can either use hthe link_to helper method, or the classic <a href="http://path.to.resource.com">Resource</a>
+
+For structuring purposes we stubbed our links. For example in the _footer.html.erb file, we have:
+<li><%= link_to "About", "#" %></li>
+
+We could use 
+<li><%= link_to "About", "/pages/about" %></li> or <li><%= link_to "About", "/about" %></li> but this is not the rails way of doing things - use NAMED ROUTES.
+The advantages:
+- We can customize our /pages/about URL by using /about for example - routes.rb
+- If we use the about link in several pages, we have to update the URL at one place only.
+<li><%= link_to "About", about_path %></li>
+But this breaks our page because there is no such path. We revert back to <li><%= link_to "About", "#" %></li>
+ and will use integration testing to solve the pb.
+
+rails g integration_test layout_links ->  create spec/requests/layout_links_spec.rb
+
+Note in BDD we used get :home (named ROUTES), but in integration testing we use URLs ('/')
+What do we want:
+- The homepage to be /
+- Contact page to be at /contact instead of /pages/contact
+- Same for /about, /help
+
+We use BDD to add a help page: pages_controller_spec.rb.
+
+To match a named routes to a URL, for example match /contact with /pages/contact,
+In the routes.rb file:
+match '/contact', :to => 'pages#contact' -> match is a helper method. We are matching /contact and routing it yo the PagesController and the contact action. This creates a named route: contact_path
+Same goes for /about, /help. 
+/ is particular.  root :to => 'pages#home'
+Note: You can have the root of your site routed with "root". Just remember to delete public/index.html.
+We can now delete the get "pages/about", etc and use the match method.
+
+
