@@ -427,3 +427,32 @@ As previously, we use integration testing to map and test our signup_path.
 Note: Integration testing is mostly used to after the work has been done - to double check.
 For example we can test our links.
 
+git status
+git add .
+git commit -am "Added UsersController and layout link tests"
+git checkout master
+git merge filling-in-layout
+git push origim master
+
+ActiveRecord is the default Rais library to deal with DB. 
+We will use migrations - interface to SQL DDL.
+In scaffolding the controller, model and views are generated for us. But as we generated manually our controller, we will generate the Model.
+
+git checkout -b modeling-users
+rails g model User name email -> Controllers are plurial and models are singular
+
+20160816132549_create_users.rb -> Generated class for us which inherits from Migration. We already have columns defined.
+ create_table :users do |t| -> t is the data model
+
+rake db:migrate
+rake db:rollback
+
+rake db:migrate
+
+Add gem 'annotate' to group development so that we can annotate our models.
+bundle install
+annotate -> Annotated user: Annotated (2): app/models/user.rb, spec/models/user_spec.rb
+Useful so that we can clearly see the columns and datatypes.
+
+We would like to restrict the fields that are accessible via the web interface. For example id is not a public field.
+Use attr_accessible :name. :email -> Already done for us.
