@@ -3,29 +3,17 @@
 <head>
 	<title><%= title%></title>
 	<%= csrf_meta_tags %>
-  	<!--[if lt IE 9]>
-   		https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.js
-   <![endif]-->
-   <%= stylesheet_link_tag 'blueprint/screen', :media => 'screen' %>
-   <%= stylesheet_link_tag 'blueprint/print', :media => 'print' %>
-   <!--[if lt IE 8]><%= stylesheet_link_tag 'blueprint/ie' %><![endif]-->
-   <%= stylesheet_link_tag 'custom', :media => 'screen' %>
+  	<%= render 'layouts/stylesheets' %>
 </head>
 <body>
 <div class="container">
 <header>
-	<%= image_tag("/images/flower_logo.jpg", :alt => "Sample App", :width => 150, :height => 100, :class => "round")%>
-	<nav class="round">
-		<ul>
-			<li><%= link_to "Home", '#'%></li>
-			<li><%= link_to "Help", '#'%></li>
-			<li><%= link_to "Sign in", '#'%></li>
-		</ul>
-	</nav>
+	<%= render 'layouts/header' %>
 </header>
 	<section class="round">
 		<%= yield %>
 	</section>
+	<%= render 'layouts/footer' %>
 </div>
 
 </body>
