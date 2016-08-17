@@ -455,5 +455,169 @@ bundle install
 annotate -> Annotated user: Annotated (2): app/models/user.rb, spec/models/user_spec.rb
 Useful so that we can clearly see the columns and datatypes.
 
-We would like to restrict the fields that are accessible via the web interface. For example id is not a public field.
+We should restrict the fields that are accessible via the web interface. For example id is not a public attribute.
 Use attr_accessible :name. :email -> Already done for us.
+
+git add .
+git commit -m "Created a User model"
+
+rails c --sandbox -> Nothing is persisted in the DB. Any modifications are rollded back on exit.
+tail -f log/development.log -> To read the logs
+User.new -> This creates a user object with nil attributes. This object is not yet persisted in the DB.
+user = User.new(:name => "Yovan Juggoo", :email => "yovan.juggoo@gmail.com") -> To create a new user we pass in a hash. The id, created_at and updated_at fields are nil at this moment.
+Nothing happens in the development log. We must save the user object to  persist the data. 
+user.save -> Returns true. Useful for boolean tests. This generate the SQL INSERT command. create_at and updated_at now have the proper timestamps - UTC.
+user.name
+user.created_at
+Note: We don't define our fields in the user.rb model file. Active record looks at the database and infers which are our fields.
+user2 = User.create(:name => "John Doe", :email => "john.doe@example.com") -> The user object is instanciated, the id, created_at and updated_at are automatically set and the user object is returned. The user object is automatically created. -> Create command.
+user2.destroy -> Destroys the user. The user object is returned by the method. DELETE command.
+User.find(1) -> returns a user by id.
+User.find(100) -> Raises an exception: Record not found. Useful when we want to raise an exception if the user does not exist.
+User.find_by_id(100) -> returns the user object if found or nil. This does not raise an exception. Useful if we don't want to handle any exception.
+User.find_by_email("yovan.juggoo@gmail.com") -> Useful as most of the time we use the user's email as login.
+User.first
+User.last
+User.all
+user.email = "yovan.juggoo@example.net"
+user.save -> returns a boolean. The user is persisted only at this point.
+user.email = "unknown@nowhere.com"
+user.reload -> Our user's email is as it was previously.
+user.update_attributes(:name => "The dude", :email => "dude@abides.org") -> To update several attributes at the same time. Returns a boolean value. Only accessible attributes are updateable.
+
+
+Validations in the user model
+	validates :name, :presence => true
+To reload the user model in the console, we have to use the reload! method
+user = User.new(:email => "foo@example.com")
+user.save -> returns false  
+Note: When we create models with validations, rails creates an array of error messages.
+user.errors.full_messages -> Returns ["Name can't be blank"]
+user.valid? -> Returns false
+user2 = User.create(:email => "foo@example.com") -> Does not raise an error but the id is null
+user2 = User.create!(:email => "foo@example.com") -> The ! is used to raise an error if the object is not valid
+
+We have already written the validation code. To use TDD, we comment out the code, write our failing tests and make the tests pass, i.e uncomment the validation code.
+
+We can run the test file for our user model that rails created for us: spec/models/user_spec.rb
+As there are real tests defined in this file, we get a 1 pending test warning: rspec spec/models/user_spec.rb
+
+We write our tests as follows: 
+
+it "should create a new instance givean a valid attribute" do
+	User.create!(:name: "Example User", :email => "user@example.edu")
+end
+
+But we get the following error for our test:
+1) User should create a new instance given a valid attribute
+     Failure/Error: User.create!(:name => "Example User", :email => "user@example.edu")
+     ActiveRecord::StatementInvalid:
+       Mysql2::Error: Table 'sample_app_test.users' doesn't exist: SHOW FULL FIELDS FROM `users`
+     # ./spec/models/user_spec.rb:17:in `block (2 levels) in <top (required)>'
+
+This error occurs because we did not prepare our test database.
+rake db:test:prepare
+rspec spec/models/user_spec.rb -> The test passes
+
+We uncomment the name validation and write a test for a non valid user, i.e a user who's name was not provided.
+it "should require a name" do
+	no_name_user = User.new(:email => "jane.smith@test.com")
+	no_name_user.should_not be_valid # when we have a be_test, this means that rspec will run the test? method on the the object
+end
+
+Same is done for the email validation.
+We have duplication of test data in our tests. We can use an instance variable in a before(:each) bloc so that test data is available in each tests. For this we will use the Hash.merge method.
+When testing for a valid user, we are using a user object who's :name attribute is nil. But when using forms, we can have empty strings.
+
+hash = { :name => "Yovan Juggoo", :email => "yovan.juggoo@gmail.com" }
+hash.merge(:name => "") -> returns the unmutated hash { :name => "", :email => "yovan.juggoo@gmail.com" }
+hash.merge!(:name => "") -> returns the umutated hash { :name => "", :email => "yovan.juggoo@gmail.com" }, i.e the hash is modified.
+
+We will write a failing test for the :name attribute, which should be at most 50 characters long.
+s = "a" * 51 returns "a....a", 51 characters
+
+ it "should reject names that are too long" do
+  	long_name = "a" * 51
+  	long_name_user = User.new(@user.merge(:name => long_name))
+  	long_name_user.should_not be_valid
+  end
+
+validates :name, :presence =>  true, :length => { :maximum => 50 }
+
+We will test for valid email addresses.
+addresses = %w[user@foo.com THE_USER@foo.bar.org first.last@foo.jp]
+Use Rubular for the email RegEx. Maybe there already have Ruby methods or gems for testing emails.
+
+email_regex = /\A[\w+\-.]+@[a-z\d\-.]+\.[a-z]+\z/i
+validates :email, :presence =>  true, :format => { :with => email_regex }
+
+Now we will try to test for the uniqueness of email addresses in the DB. Uniqueness should also be case insensitive.
+
+it "should reject duplicate email addresses" do
+    User.create!(@user)
+    user_with_duplicate_email = User.new(@user)
+    user_with_duplicate_email.should_not be_valid
+  end
+
+   it "should reject email addresses identical up to case" do
+   	upcased_email = @user[:email].upcase
+   	User.create!(@user.merge(:email => upcased_email))
+	user_with_duplicate_email = User.new(@user)
+    user_with_duplicate_email.should_not be_valid
+  end
+validates :email, :presence =>  true, :format => { :with => email_regex }, 
+  					:uniqueness => { :case_sensitive => false }
+
+Now we will add an index to our email column for quick search. We need a migration.
+Create migrations are implicit - when we do a rails g model Model fields. 
+rails g migration add_email_uniqueness_index
+We edit the migration file as follows:
+
+class AddEmailUniquenessIndex < ActiveRecord::Migration
+  def up
+  	add_index :users, :email, :unique => true
+  end
+
+  def down
+  	remove_index :users, :email
+  end
+end
+
+Note: We added an index on the email colum of the users table and stated that this index should be unique. add_index is a method.
+In the down migration we use the remove_index method to delete the index.
+rake db:migrate
+
+As a good habit we do a rake db:test:prepare and run our tests.
+
+git add .
+git commit -m "User model validations"
+
+In application.html.erb, we put some debugging -> <%= debug params if Rails.env.development? %>
+
+rails c -> Not in sandbox, so persistent.
+User.create!(:name => "Yovan Juggoo", :email => "yovan.juggoo@gmail.com")
+
+1. Create a layout to show user info.  -> views/layouts/users/show.html.erb
+
+Http request	URL				Action 		Purpose
+========================================================================
+GET 			/users/1 		show		page to show user with id 1
+
+In this page we display only the user's name and email. We have to define an instance variable @user in the UsersController.
+<%= @user.name  %>, <%= @user.email %>
+
+
+2. Add the mapping to our users#show action in the routes.rb file.
+We add resources :users (this does all the routing mapping for all actions) and delete the line get "users/new" as this is implicit when we use  resources :users .
+
+3.  We can an error "undefined method name for nil:NilClass" if we run localhost:7777/users/1.
+This is because @user is not defined in the controller ans hence is nil.
+
+4. We define the show action and return @user
+	def show
+		#@user = User.find(1) -> We don't want to hardcode the id.
+		@user = User.find(params[:id])
+	end
+
+git add .
+git commit -m "added a stub user show page"
