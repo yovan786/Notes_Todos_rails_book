@@ -432,20 +432,21 @@ git add .
 git commit -am "Added UsersController and layout link tests"
 git checkout master
 git merge filling-in-layout
-git push origim master
+git push origin master
 
-ActiveRecord is the default Rais library to deal with DB. 
+ActiveRecord is the default Rails library to deal with DB. 
 We will use migrations - interface to SQL DDL.
-In scaffolding the controller, model and views are generated for us. But as we generated manually our controller, we will generate the Model.
+In scaffolding the controller, model and views are generated for us. But as we generated manually our controller, we will generate the data model.
 
-git checkout -b modeling-users
+git checkout -b modeling-users -> Create a new branch
 rails g model User name email -> Controllers are plurial and models are singular
 
 20160816132549_create_users.rb -> Generated class for us which inherits from Migration. We already have columns defined.
- create_table :users do |t| -> t is the data model
+create_table :users do |t| -> t is the data model
+We can see that rails defines our fields as columns and t.timestamps represent the created_at and updated_at columns. The id column is automatically created for us. We can see the sane in schema.rb.
 
-rake db:migrate
-rake db:rollback
+rake db:migrate -> Creates our tables in the database
+rake db:rollback -> Deletes the table
 
 rake db:migrate
 
