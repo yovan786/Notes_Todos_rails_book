@@ -58,4 +58,11 @@ describe User do
     user_with_duplicate_email.should_not be_valid
   end
 
+  describe "passwords" do
+    it "should have a passwords attribute" do
+      User.new(@user).should respond_to(:password)
+    end
+  end
+
+
 end

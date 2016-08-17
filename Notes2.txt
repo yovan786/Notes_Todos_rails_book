@@ -621,3 +621,18 @@ This is because @user is not defined in the controller ans hence is nil.
 
 git add .
 git commit -m "added a stub user show page"
+
+First of all we use insecure passwords to get things working and  then we'll use secure passwords.
+We won't use a migration to create a password column as we would finally want to use encrypted passwords.
+We will create a password that requires confirmation.
+We will use the respond_to? method to check for the presence of a password attribute on a user object.
+
+rails c
+user = User.new
+user.respond_to?(:name) -> This is the same as asking if the user has an attribute name
+user.respond_to?(:yovan) -> Returns false. 
+
+rspec spec\models\user_spec.rb
+This will fail as we don't have a password field in our user model.
+We will use a normal Ruby attribute to hold our password, because in the end we will be using encrypted passwords: 
+attr_accessor :password -> This will create the getters and setters to manipulate passwords.
