@@ -1,7 +1,34 @@
 sample_app
 ===========
 By default rails uses TestUnit for testing, but we will use RSpec. We must suppress the creation of the default test directory.
-rails new sample_app -T -d mysql
+1. rails new sample_app -T -d mysql
+
+2. Below is the Gemfile to be used with Rails 3.2.16
+---------------------------------------------------
+source 'http://rubygems.org'
+
+gem 'rails', '3.2.16'
+
+gem "mysql2", "0.3.11", :platforms => [:mri, :mingw]
+gem "activerecord-jdbcmysql-adapter", :platforms => :jruby
+
+group :assets do
+  gem 'sass-rails',   '~> 3.2.3'
+  gem 'coffee-rails', '~> 3.2.1'
+  gem 'uglifier', '>= 1.0.3'
+end
+
+gem 'jquery-rails'
+------------------------------------------------------------
+
+3. Create development, production and test schemas.
+create database library_development;
+create database library_production;
+create database library_test;
+grant all privileges on library_development.* to 'yovan'@'localhost' identified by 'ab6307sn';
+grant all privileges on library_production.* to 'yovan'@'localhost' identified by 'ab6307sn';
+grant all privileges on library_test.* to 'yovan'@'localhost' identified by 'ab6307sn';
+
 cd sample_app
 We must install RSpec. In the Gemfile we must add the following lines:
 
