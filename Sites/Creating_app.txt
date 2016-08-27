@@ -1,0 +1,47 @@
+1. rails new blog -T -d mysql
+
+2. Modify Gemfile as follows:
+source 'http://rubygems.org'
+
+gem 'rails', '3.2.16'
+
+gem "mysql2", "0.3.11", :platforms => [:mri, :mingw]
+gem "activerecord-jdbcmysql-adapter", :platforms => :jruby
+
+group :assets do
+  gem 'sass-rails',   '~> 3.2.3'
+  gem 'coffee-rails', '~> 3.2.1'
+  gem 'uglifier', '>= 1.0.3'
+end
+
+gem 'jquery-rails'
+
+group :development do
+  gem "rspec-rails", "~> 2.8"
+  gem 'annotate'
+end
+
+group :test do
+  gem "rspec", "~> 2.8"
+end
+
+3. cd my_app
+
+4. bundle install
+
+5. 
+create database blog_development;
+create database blog_production;
+create database blog_test;
+grant all privileges on blog_development.* to 'yovan'@'localhost' identified by 'ab6307sn';
+grant all privileges on blog_production.* to 'yovan'@'localhost' identified by 'ab6307sn';
+grant all privileges on blog_test.* to 'yovan'@'localhost' identified by 'ab6307sn';
+
+6. mv README.rdoc to README.md and modify its content as follows
+This is a new application created by Yovan Juggoo.
+
+7. Modify .gitignore file if necessary.
+/.bundle
+/db/*.sqlite3
+/log/*.log
+/tmp
