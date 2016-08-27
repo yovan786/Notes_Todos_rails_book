@@ -82,7 +82,7 @@ We will test for the presence of an about page
 First we remove the tests for our views and helpers. We will do these tests in the controllers test.
 git rm -r spec/views
 git rm -r spec/helpers
-ls spec -> spec_helper.rb (file used by rspec ro run) and the controllers/pages_controller_spec.rb
+ls spec -> spec_helper.rb (file used by rspec to run) and the controllers/pages_controller_spec.rb
 We can run the spec directory for all of our tests(here we have one only).
 rspec spec/ -> We must wait for long but we are finally green
 The overhead for running our tests is because of the loading of the RSpec environment in memory. Spork can be used to speed RSpec.

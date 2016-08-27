@@ -45,3 +45,6 @@ This is a new application created by Yovan Juggoo.
 /db/*.sqlite3
 /log/*.log
 /tmp
+
+
+
