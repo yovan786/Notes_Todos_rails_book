@@ -25,6 +25,8 @@ group :test do
   gem "rspec", "~> 2.8"
 end
 
+gem 'webrat'
+
 3. cd my_app
 
 4. bundle install

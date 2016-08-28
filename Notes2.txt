@@ -173,7 +173,7 @@ module ApplicationHelper
 		if @title.nil? #By default @title being an instance variable is nil
 			base_title #methods return the last line evaluated
 		else
-			"#{base_title} | # {@title}"
+			"#{base_title} | #{@title}"
 		end
 	end
 end
@@ -224,8 +224,8 @@ a.last
 a.second = 20 -> rails not ruby
 a.length
 a.empty?
-a.sort
-a.sort!
+a.sort -> Returns the sorted array but a is unchanged.
+a.sort! -> Returns the sorted array and changes a.
 a.reverse
 a.reverse!
 a.shuffle
@@ -253,9 +253,15 @@ or (1..5).map do |i|
 	puts "Betulgeuse"
 end
 
+persons = []
+10.times { |i| #i starts with 0
+	persons << "person_#{i}"
+}
+
 Where we see the keyword do, we are using a block. For example in our tests and in the Gemfile.
 %w[foo bar baz] -> ["foo bar baz"]
 %(a b c) -> "a b c"
+%(Yovan Juggoo Navaanitasingh) -> "Yovan Juggoo Navaanitasingh"
 b = %w[foo bar a b c].map {|string| string.upcase} -> ["FOO", "BAR", "A", "B", "C"]
 %w[a b c].map(&:upcase) -> ["A", "B", "C"]
 
@@ -278,7 +284,7 @@ Symbols are more efficient for comparision than strings. "test" == "Test". Here 
 
 flash = { :success => "It worked!", ":error" => "It failed"}
 flash.each do |key, value|
-	puts "Key: #{key.inspect}  \nValue #"{value.inspect}"
+	puts "Key: #{key.inspect}  \nValue #{value.inspect}"
 end
 
 key.inspect is important cause key only will be interpolated as a string => key.to_s
@@ -332,7 +338,7 @@ pages.home -> "Home"
 
 A ruby class - for testing purposes
 class User
-	attr_acessor :name, :email
+	attr_accessor :name, :email
 
 	def initialize (attributes = {})
 		@name = attributes[:name]
@@ -387,9 +393,6 @@ git push
 git push heroku
 heroku open
 
-
-Chapter 5 - Begin with ruby_0502.flv
---------------------------------------
 As we will be making a large number of changes, we will create and work on a new branch of the master branch.
 git checkout -b filling-in-layout
 
