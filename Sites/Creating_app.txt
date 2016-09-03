@@ -52,5 +52,8 @@ This is a new application created by Yovan Juggoo.
 /log/*.log
 /tmp
 
+8. Generate the file necessary for rspec
+rails generate rspec:install
+
 
 
