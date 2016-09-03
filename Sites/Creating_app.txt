@@ -1,3 +1,7 @@
+First of all we ensure that we don't install rdocs and ris for our gems to save installation time.
+Make a file ~/.gemrc and put this in it:
+gem: --no-rdoc --no-ri
+
 1. rails new blog -T -d mysql
 
 2. Modify Gemfile as follows:
