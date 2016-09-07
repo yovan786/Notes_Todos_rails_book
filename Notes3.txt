@@ -1,12 +1,12 @@
-Http request	URL				Action 		Purpose
-===================================================================
-GET 			/users 			index 		page to list all users
-GET 			/users/1 		show		page to show user with id 1
-GET  			/users/new 		new			page to make a new user
-POST  			/users 			create		create a new user
-GET  			/users/1/edit 	edit		page to edit user 1
-PUT  			/users/1 		update		update user with id 1
-DELETE  		/users/1 		destroy		delete user with id 1
+Http request	URL				Action  	Named route			Purpose
+==================================================================================
+GET 			/users 			index 		users_path 			page to list all users
+GET 			/users/1 		show		user_path(1)    	page to show user with id 1
+GET  			/users/new 		new			new_user_path   	page to make a new user
+POST  			/users 			create		users_path      	create a new user
+GET  			/users/1/edit 	edit		edit_user_path(1)	page to edit user 1
+PUT  			/users/1 		update		user_path(1)        update user with id 1
+DELETE  		/users/1 		destroy		user_path(1)        delete user with id 1
 
 sample_app
 ===========
@@ -917,8 +917,25 @@ We use our method in our helper: <%= gravatar_for @user%>. Note we did not pass 
 Note: To update a record using the console:
 rails c
 User.first.update_attributes(:email => "yovan.juggoo@gmail.com", :password => "foobar", :password_confirmation => "foobar")
+Modified the show.html.erb file:
+<table class="profile" summary="Profile information">
+	<tr>
+		<td class="main">
+			<h1>
+				<%= gravatar_for @user%>
+				<%= "#{@user.name}" %>
+			</h1>
+		</td>
+		<td class="sidebar round">
+			<strong>Name</strong> <%= @user.name %> <br>
+			<strong>URL</strong> <%= link_to user_path(@user), @user%>
+		</td>
+	</tr>
+</table>
 
-
+Note: 
+1. We define links using the named routes. For example users/id => user_path(@user.id) or  user_path(@user)
+2. When using links, we can use link_to "somewhere", @user. Rails knows automatically that we want to fo to users/@user.id.
 
 
 
