@@ -216,7 +216,7 @@ rails c or rails console. The rails console is irb with access to rails componen
 14. false, true and nil are boolean values. "", 0 are not false but truthy values.
 15. !!0, !![], !!"" returns true
 16. ApplicationHelper is a module, hence gets included in the controller's class.
-17. "foo bar    baz".split -> ["foo", bar, baz] is an array of strings splitted on a whitespace.
+17. "foo bar    baz".split -> ["foo", "bar", "baz"] is an array of strings splitted on a whitespace.
 "fooxxxbarxxxbax".split("xxx")
 18. a = [10, 20, 30, 40]
 a[-1] = 40
@@ -403,7 +403,7 @@ We will format our page as in mockup.png. The main page to be formatted is layou
 - We added our custom stylesheet.
 - blueprint expects that the content is placed in a container class.
 
-image_tag (path, alt, class) is a helper method.
+image_tag (path, alt, class) is a rails helper method.
 <%= image_tag("flower-logo.jpg", :alt => "Sample App", :class => "round")%>
 is rendered to : <img alt="Sample App" class="round" src="/assets/logo.png" />
 
@@ -418,13 +418,13 @@ Soon we can see that the application.html.erb file is becoming cluttered in the 
 We use the render helper method to include our partial.
 <%= render 'layouts/stylesheets'> -> rails recognises partials by their name beginning with an underscore, but we use them in our layouts without the '_'.
 
-We did same with the header and the footer. Note: for remote resources, we can either use hthe link_to helper method, or the classic <a href="http://path.to.resource.com">Resource</a>
+We did same with the header and the footer. Note: for remote resources, we can either use the link_to helper method, or the classic <a href="http://path.to.resource.com">Resource</a>
 
 For structuring purposes we stubbed our links. For example in the _footer.html.erb file, we have:
 <li><%= link_to "About", "#" %></li>
 
 We could use 
-<li><%= link_to "About", "/pages/about" %></li> or <li><%= link_to "About", "/about" %></li> but this is not the rails way of doing things - use NAMED ROUTES.
+<li><%= link_to "About", "/pages/about" %></li> but this is not the rails way of doing things - use NAMED ROUTES.
 The advantages:
 - We can customize our /pages/about URL by using /about for example - routes.rb
 - If we use the about link in several pages, we have to update the URL at one place only.
@@ -444,7 +444,7 @@ We use BDD to add a help page: pages_controller_spec.rb.
 
 To match a named routes to a URL, for example match /contact with /pages/contact,
 In the routes.rb file:
-match '/contact', :to => 'pages#contact' -> match is a helper method. We are matching /contact and routing it yo the PagesController and the contact action. This creates a named route: contact_path
+match '/contact', :to => 'pages#contact' -> match is a helper method. We are matching /contact and routing it to the PagesController and the contact action. This creates a named route: contact_path
 Same goes for /about, /help. 
 / is particular.  root :to => 'pages#home'
 Note: You can have the root of your site routed with "root". Just remember to delete public/index.html.
@@ -483,7 +483,7 @@ rails g model User name email -> Controllers are plurial and models are singular
 
 20160816132549_create_users.rb -> Generated class for us which inherits from Migration. We already have columns defined.
 create_table :users do |t| -> t is the data model
-We can see that rails defines our fields as columns and t.timestamps represent the created_at and updated_at columns. The id column is automatically created for us. We can see the sane in schema.rb.
+We can see that rails defines our fields as columns and t.timestamps represent the created_at and updated_at columns. The id column is automatically created for us. We can see the same in schema.rb.
 
 rake db:migrate -> Creates our tables in the database
 rake db:rollback -> Deletes the table
@@ -525,7 +525,6 @@ user.email = "unknown@nowhere.com"
 user.reload -> Our user's email is as it was previously.
 user.update_attributes(:name => "The dude", :email => "dude@abides.org") -> To update several attributes at the same time. Returns a boolean value. Only accessible attributes are updateable.
 
-
 Validations in the user model
 	validates :name, :presence => true
 To reload the user model in the console, we have to use the reload! method
@@ -544,7 +543,7 @@ As there are real tests defined in this file, we get a 1 pending test warning: r
 
 We write our tests as follows: 
 
-it "should create a new instance givean a valid attribute" do
+it "should create a new instance given a valid attribute" do
 	User.create!(:name: "Example User", :email => "user@example.edu")
 end
 
@@ -571,7 +570,7 @@ When testing for a valid user, we are using a user object who's :name attribute 
 
 hash = { :name => "Yovan Juggoo", :email => "yovan.juggoo@gmail.com" }
 hash.merge(:name => "") -> returns the unmutated hash { :name => "", :email => "yovan.juggoo@gmail.com" }
-hash.merge!(:name => "") -> returns the umutated hash { :name => "", :email => "yovan.juggoo@gmail.com" }, i.e the hash is modified.
+hash.merge!(:name => "") -> returns the mutated hash { :name => "", :email => "yovan.juggoo@gmail.com" }, i.e the hash is modified.
 
 We will write a failing test for the :name attribute, which should be at most 50 characters long.
 s = "a" * 51 returns "a....a", 51 characters
@@ -623,7 +622,7 @@ class AddEmailUniquenessIndex < ActiveRecord::Migration
   end
 end
 
-Note: We added an index on the email colum of the users table and stated that this index should be unique. add_index is a method.
+Note: We added an index on the email column of the users table and stated that this index should be unique. add_index is a method.
 In the down migration we use the remove_index method to delete the index.
 rake db:migrate
 
@@ -666,13 +665,239 @@ First of all we use insecure passwords to get things working and  then we'll use
 We won't use a migration to create a password column as we would finally want to use encrypted passwords.
 We will create a password that requires confirmation.
 We will use the respond_to? method to check for the presence of a password attribute on a user object.
+Always use the respond_to? method to test when a new attribute is added in our models.
+
+We will style our users show page as profile_mockup_profile_name.png
+We will style our Sign up page as signup_mockup.png
+
 
 rails c
 user = User.new
 user.respond_to?(:name) -> This is the same as asking if the user has an attribute name
 user.respond_to?(:yovan) -> Returns false. 
 
+We use a test to test whether our User model resonds to the :password attribute in the user_spec.rb.
+describe "passwords" do
+    it "should have a password attribute" do
+      User.new(@sample_user).should respond_to(:password)
+    end
+end
+
 rspec spec\models\user_spec.rb
 This will fail as we don't have a password field in our user model.
 We will use a normal Ruby attribute to hold our password, because in the end we will be using encrypted passwords: 
-attr_accessor :password -> This will create the getters and setters to manipulate passwords.
+attr_accessor :password -> This will create the getters and setters to manipulate passwords. It will be a virtual attribute.
+Now the test should pass.
+We will test for respond_to :password_confirmation also. But we will not add the password_confirmation attribute as we did with the password attribute.
+- First of all we will add password validations test in our user_spec.rb.
+- We are still red so we add a vaidation for our :password attribute.
+
+validates :password, :presence => true, :confirmation => true
+- The password is now required
+- implicitly a required password_confirmation attribute is created for us.
+- If we run our tests once again we'll see that some of our older tests fail. This is because the :password attribute is now required.
+We should update our @user_hash value in our before:each block.
+We re-run our tests and get the following errors:
+Failure/Error: User.create! @user_hash
+ ActiveModel::MassAssignmentSecurity::Error:
+   Can't mass-assign protected attributes: password, password_confirmation
+
+This happens because the :password and :password_confirmation attributes have to be made accessible.
+
+Note: All fields that will be accessible through the web must be attr_accessible.
+We are green now if we run our tests.
+For our password mismatch test, "invalid" does not match our password in @user_hash
+
+We write a failing test for short and long passwords and then the corresponding validations - passwords should be at least 6 characters long and have a maximum length of 40.
+validates :password, :presence => true, :confirmation => true, :length => { :minimum => 6, :maximum => 40 }
+The better way to write the validation above:
+validates :password, :presence => true, :confirmation => true, :length => { :within => 6..40 }
+
+We are not storing the value of the :password attribute in the database. The encrypted password is saved in an encrypted_password colums - we have to create a migration.
+First we write a failing test for the presence of the encrypted password attribute. We must create a user in the database (in the before:each block).
+
+Previously we generated a migration to add an index to the email attribute of the user table. It was a convenience migration. Here we will generate a special migration.
+
+rails g migration add_password_to_users encrypted_password:string
+
+If we open the migration file we can see that rails has automatically written the add_column and remove_column method calls in the up and down methods respectively.
+Note: In Rails 3.2.16 we don't have the self.up and self.down methods. Instead the add_column method is called in the change method.
+
+def change
+ add_column :users, :encrypted_password, :string
+end
+
+Now we run the migration to create the encrypted_password column in the database and we annotate the user model.
+rake db:migrate
+annotate
+
+If we run the tests again after creation of the encrypted_password column, we will still be red, despite the fact that the encrypted_password attribute is implicitly accessible. This is because we migrated our development DB but have not prepared our test database to reflect these changes.
+
+rake db:test:prepare
+
+If we want to run only one particular example
+rspec path_to_test_file -e "test_description", for example
+rspec spec\models\user_spec.rb -e "should have an encrypted password attribute"
+
+We then write a failing test for the encrypted password should not be blank.
+For testing purposes we run the rails console in a sandbox:
+rails c -s
+user = User.create! :name => "Example User", :email => "example@example.net", :password => "password", "password_confirmation" => "password"
+As we can see we do create the user object, but the encrypted password is nil. What we want is before the user is saved, we set the value of the encrypted_password to a hashed encrypted value of the password attribute.
+
+We will register a callback for the encrypted_password.
+register means write the code 
+callback methods are methods that are ran at a particular time in the life-cycle of an object.
+
+1. We define the callback method encrypt_password in the user model, which will run before the user object is saved.
+before_save :encrypt_password
+2. As the encrypt_password method should only be available in the User class, we must make this method private.
+If we try to run the private method in the rails sandbox console, we get a NoMethodError: private method 'encrypt_password' called
+3. Write a dummy code for our private encrypt_password method. We want the encrypt_password method to set the value of our :encrypted_password attribute to an encrypted version of our :password attribute.
+In the context of the class itsef we use self.encrypted_password = value to set the encrypted_password attribute.
+
+Note: If we don't use self.encrypted_password in the method, Ruby will create a local encrypted_password variable.
+
+We will use another private method encrypt to perform the actual encryption. As we have not written the implementation of the encrypt method, we will return the string itself passed as a parameter to the method.
+
+def encrypt(value)
+	value
+end
+
+If we run our test again it should be green now.
+
+Normally a user signs in via a form and we have to compare the submitted password with the encrypted password in the database. We cannot compare the passwords directly; we should encrypt the submitted password and then compare it to the encrypted_password in the database.
+We should define a has_password boolean method in the User class, which will return true if the user object has the encrypted_password.
+First we write a failing test for the has_password method.
+After adding the has_password?(submitted_password) method, we should be green.
+
+Secondly, we should test if the submitted_password and encrypted_password match. This is done by using the has_password?(submitted_password) method which will return a boolean value whether the encrypted_password == encrypt(submitted_password)
+
+rails c -s
+require 'digest'
+Digest::SHA2.hexdigest("foobar")
+
+def secure_hash(string)
+	Digest::SHA2.hexdigest(string)
+end
+
+password = "secret"
+encrypted_password = secure_hash(password)
+
+submitted_password = "secret"
+encrypted_password = secure_hash(secret)
+
+If we know the hashing algorithm of the password, by rainbow attack, we can guess the password of a user by comparing the hashed password with the encrypted password.
+We should use a unique salt for each user. The salt we use here is the combination of the current time and the user's password. This ensures that two users having the same password will have a different encrypted_password as long as they both don't create their accounts at the same time.
+
+Time.now
+Time.now.utc
+
+salt = secure_hash("#{Time.now.utc}---#{submitted_password}")
+encrypted_password = secure_hash("#{salt}--#{submitted_password}")
+
+We have to store the salt, hence we need to add an attribute to the user model.
+First we write a failing test for the salt attribute in the password encryption describe block.
+We need to add a migration for the salt column.
+rails g migration add_salt_to_users salt:string
+rake db:migrate && rake db:test:prepare
+rspec spec\models\user_spec.rb
+
+
+We will define the encrption machinery in the user model by defining a secure_hash(string) method.
+
+Note: In the encrypt(string) method we don't pass the salt because salt is an attribute of the user model.
+
+Important:
+1. We set the salt in the encrypt_password method by calling the make_salt method.
+2. We don't need to create a new salt in the encrypt_password method each time we have to encrypt a submitted password. A new salt is created only if the user object is a new record. The new_record? method of ActiveRecord tests whether a model object is a new record.
+
+We should be green.
+
+rails c -s
+user = User.create!(:name => "Pierre Anne", :email => "pierre.anne@gmail.com", :password => "foobar", :password_confirmation => "foobar")
+
+As we can see the user.salt and user.encrypted_password have been set. The salt will not change, but the encrypted_password will change if the user changes his password.
+
+user.has_password?("foobar") returns true
+
+In the application, we will authenticate the user by their email and compare their submitted password with the encrypted_password =>
+1. not_logged_in_user = User.find_by_email("pierre.anne@gmail.com")
+2. submitted_password = "foobar"
+3. not_logged_in_user.has_password?(submitted_password)
+
+We need a method to authenticate a user based on his email and his submitted_password: User.authenticate(email, submitted_password)
+
+We write failing tests to test whether a user is authenticated.
+1. Test for the authenticate method. authenticate is a CLASS method.
+2. Test if email/password mismatch.
+3. Test if a valid email/password returns the correct user.
+
+In the authenicate method, we find the user by email. If the user is nil, we return nil.
+If the user is not nil, i.e there is a user for the given email, we return the user if he has the given password.
+Else as the user does not have the password, we will return nil automatically.
+
+In the console (rails c -s)
+User.authenticate("pierre.anne@gmail.com", "foobar") returns the user object.
+
+In routes.rb, we defined our users routes using resources :users
+We get the new and show (and other actions) matched for free in the file. 
+Also we have matched our /signup URL to the new action.
+
+We write a test to get the show page in our users_controller.rb test file: 
+render_views
+
+describe "GET 'show'" do
+	 it "returns http success" do
+	  get :show
+	  response.should be_success
+	end
+end
+
+rspec spec\controllers\user_controller_spec.rb
+But we get the following error:
+No route matches {:controller=>"users", :action=>"show"}
+We must pass an id to the show page => /user/id
+
+So we must use pass an id to our show method:
+get :show, :id => some_id
+
+We don't have any users in our test database. We'll use factories to add users to the test database.
+We could use User.create! to define our users, but factories are more convenient.
+We will use FactoryGirl.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

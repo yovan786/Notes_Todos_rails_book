@@ -28,3 +28,4 @@
 22. What is the difference between mocks, integration testing, e2e, etc. See all ways to test data
 23. Get Rails 3 cheat sheets.
 24. See ruby_0603.flv for the email RegEx: 32:00
+25. How to define private methods in a model class.

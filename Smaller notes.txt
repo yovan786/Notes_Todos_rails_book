@@ -1,0 +1,7 @@
+To create a new static page - Controller is pages_controller.rb:
+1. Add action in PagesController for example skill
+2. Create skill.html.erb page in views/pages
+3. Add get "pages/skill" route in routes.rb
+4. Delete public/index.html file
+5. Use root :to => "pages#home"
+
