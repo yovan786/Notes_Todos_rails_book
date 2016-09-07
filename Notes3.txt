@@ -935,12 +935,56 @@ Modified the show.html.erb file:
 
 Note: 
 1. We define links using the named routes. For example users/id => user_path(@user.id) or  user_path(@user)
-2. When using links, we can use link_to "somewhere", @user. Rails knows automatically that we want to fo to users/@user.id.
+2. When using links, we can use link_to "somewhere", @user. Rails knows automatically that we want to  to link to users/@user.id.
+
+Chapter 8
+==========
+We will code our sign-up form. As we already have a user in our database, we will reset it to start with a clean slate and create a branch.
+rake db:reset
+git checkout -b sign-up
+The page we want to code is signup_mockup.png.
+The sign-up form will live in the users/new.html.erb file.
+form_for is a Rails helper that creates a form for a particular object - here User.
+
+<%= form_for(@user) do |f| %>
+<% end %>
+
+We add the user fields that we want in our form.
+<h1>Sign up</h1>
+<%= form_for(@user) do |f| %>
+	<div class="field">
+		<%= f.label :name  %><br>
+		<%= f.text_field :name %>
+	</div>
+<% end %>
+If we run our tests, we'll be red. This is because when hitting the :new page, in our tests, we get exceptions as the @user variable is nil in our users_controller.rb
+
+In the new action (users_controller), we define our @user attribute: @user = User.new
+Note: We don't pass a hash to initialize the new User. This is done in the :create action, where the user will be initialized using the form attributes.
+We should be green now.
+
+The form_for helper generates the code below for us:
+
+<form accept-charset="UTF-8" action="/users" class="new_user" id="new_user" method="post">
+	<div style="margin:0;padding:0;display:inline">
+		<input name="utf8" type="hidden" value="&#x2713;" />
+		<input name="authenticity_token" type="hidden" value="Ds4l7xIoiRDTe1SFp7iT/1Lhnwh2G2BIWC26OviMMUo=" />
+	</div>
+	<div class="field">
+		<label for="user_name">Name</label><br>
+		<input id="user_name" name="user[name]" size="30" type="text" />
+	</div>
+</form>
+
+Rails already knows that we want to create a new user. We can see class="new_user", id="new_user" and method="post", action="/users".
+
+As for our HTML fields, Rails have generated a label for="user_name" and same for input.
+
+By default, uses the field symbol to generate the label. But if we want a custom label, we can use a second string argument to our f.label method: 
+<%= f.label :password_confirmation, "Confirmation" %>
 
 
-
-
-
+ 
 
 
 
