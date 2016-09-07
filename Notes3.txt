@@ -983,12 +983,130 @@ As for our HTML fields, Rails have generated a label for="user_name" and same fo
 By default, uses the field symbol to generate the label. But if we want a custom label, we can use a second string argument to our f.label method: 
 <%= f.label :password_confirmation, "Confirmation" %>
 
+At this point if we try to post our form, we will get an error on the page. We have not yet defined the create action.
+We'll show errors on the page - signup_mockup_with_errors.png
 
- 
+1. Add the create action to the UsersController
+2. We add the user attribute. For now we will assign it as the following: @user = User.new
+3. render 'new' to render the new page
 
+If we submit the empty sign up form, the create action is run and we are redirected to the /users page. We have debugging set up <%= debug params if Rails.env.development? %>.
 
+This prints:
+utf8: ✓
+authenticity_token: Ds4l7xIoiRDTe1SFp7iT/1Lhnwh2G2BIWC26OviMMUo=
+user: !ruby/hash:ActiveSupport::HashWithIndifferentAccess
+  name: ''
+  email: ''
+  password: ''
+  password_confirmation: ''
+commit: Sign up
+action: create
+controller: users
 
+user here is a Hash - the params hash has a user hash and the value of the keys of the user hash are empty. 
+When we submit the form with values, we get the user hash populated with these values and they are printed in our debug on form submission.
+utf8: ✓
+authenticity_token: Ds4l7xIoiRDTe1SFp7iT/1Lhnwh2G2BIWC26OviMMUo=
+user: !ruby/hash:ActiveSupport::HashWithIndifferentAccess
+  name: Yovan Juggoo
+  email: yovan.juggoo@gmail.com
+  password: foobar
+  password_confirmation: foobar
+commit: Sign up
+action: create
+controller: users
 
+Note: The URL is now posted to /users
+
+We will write failing tests for our form submission.
+1. Define a "Post 'create' block" and a nested "failure" block.
+2. Define an invalid_user_hash. For a start, empty strings are invalid for our user's attributes.
+@invalid_user_hash = { :name => "", :email => "", :password => "", password_confirmation => "" }
+3. We will test for the right title ("Sign up"). For this to pass we must add an @title attribute to our create action in our controller.
+4. We will test for the rendering of the new page: response.should render_template("new")
+We should be green for these two tests.
+5. We will have a test that a user is not created in the database with empty fields. 
+We use a lamda block - an annonymous block that does not do anything. We will apply the should_not change method to this block:
+it "should not create a user" do
+	lambda do
+	  post :create, :user => @invalid_user_hash
+	end.should_not change(User, :count)
+end
+User.count returns the count in the DB.
+
+The code in the lamda block just says that if we try to create a user with invalid data, it should not change the user count in the database. change is a rails method. The second argument is the method that we call on the first argument model - the user model. We should be green.
+7. In our create method, we initialize the user object with the params[:user] hash and we will try to save the user. We should still be green.
+ @user = User.new(params[:user])
+ @user.save # if params[:user] is invalid, the user will not save as the data won't pass the validations.
+
+To see what params[:user] holds, we do raise params[:user].inspect. This gives a nice representation of the object. We will be red as an exception has been raised.
+Before submitting the sign-in form, we populate it with sone data. We get the error on the page with the params hash. Note that the password values of our user hash are filtered.
+
+Now we will get the form working as it should
+We had:
+ def create
+  	#raise params[:user].inspect
+  	@user = User.new(params[:user])
+  	@user.save
+  	@title = "Sign up"
+  	render "new"
+  end
+
+Now we have a stub:
+def create
+  	#raise params[:user].inspect
+  	@user = User.new(params[:user])
+  	if @user.save
+  		#handle the save
+  	else
+  		@title = "Sign up"
+  		render "new"
+  	end
+  end
+
+If the save is not successful (i.e invalid data were submitted through the form), we should display the errors on the new page.
+
+rails c -s
+user = User.new
+user.save #false
+user.errors.full_messages
+=> ["Name can't be blank", "Email can't be blank", "Email is invalid", "Password can't be blank", "Password is too short (minimum is 6 characters)"]
+
+We will render an error partial that will show the errors on the page in new.html.rb
+<%= render 'shared/error_messages' %>
+Note: we created an _error_messages.html.erb template in the shared folder.
+
+a = [1, 2, 3]
+a.empty? #false
+a.any? #true
+user.errors.any? #true
+#pluralize is not included by default in the console
+include ActionView::Helpers::TextHelper
+pluralize(1, "error") # 1 error
+pluralize(17, "error") # 17 error
+
+In the _error_messages.html.erb partial:
+<% if @user.errors.any? %>
+	<div id="error_exclamation">
+		<h2>
+			<%= pluralize(@user.errors.count, "error") %> prohibitted this user from being saved:
+		</h2>
+		<p>There were problems with the following fields</p>
+		<ul>
+		<% @user.errors.full_messages.each do |message| %>
+			<li><%= message %></li>
+		<% end %>
+		</ul>
+	</div>
+<% end %>
+
+On submitting the form with empty fields, with non valid emails, password/password confirmation mismatch, etc. we can see the errors as our object is not valid.
+
+In the application.rb file we have the following line:
+config.filter_parameters +=[:password]
+This adds the password parameters to the list of parameters to be filtered. We cannot see the password in our logs, exceptions and page debugs.
+We can use a secret_code field and add it to the config.filter_parameters.
 
 
 

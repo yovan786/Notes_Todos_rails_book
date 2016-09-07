@@ -51,4 +51,29 @@ describe UsersController do
     end
   end
 
+  describe "POST 'create'" do
+
+    describe "failure" do
+      before:each do
+        @invalid_user_hash = { :name => "", :email => "", :password => "", :password_confirmation => "" }
+      end
+
+      it "should have a right title" do
+        post :create, :user => @invalid_user_hash
+        response.should have_selector("title", :content => "Sign up")
+      end
+
+      it "should render the 'new' page" do
+        post :create, :user => @invalid_user_hash
+        response.should render_template("new")
+      end
+
+      it "should not create a user" do
+        lambda do
+          post :create, :user => @invalid_user_hash
+        end.should_not change(User, :count)
+      end
+
+    end
+  end
 end
