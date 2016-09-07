@@ -885,18 +885,38 @@ b. We use the assign method to test wheter the user passed to the show method is
 The test should fail at first because we commented the line.
 By uncommenting the commented line, we are green.
 
+Test if the show page has the user's name as a title. To make the test pass @title = @user.name in users_controller.
+Note: Showing the user name in the browser is potentially dangerous. Suppose the user adds Javascript in this name, we would open our site to cross-scripting attacks. In Rails 3 HTML is escaped ny default.
+If we really want to show the script we should use the raw method
+<h1><%= raw(@user.name + "<script>" %></h1>
 
 
+We will test for the presence of a gravatar image in the show page.
+gem "gravatar_image_tag", "0.1.0"
+bundle install
+In our users/show.html.erb file we have:
+<h1>
+<%= gravatar_image_tag @user.email%>
+<%= "#{@user.name}" %>
+</h1>
 
+We will test whether we have an image having a class="gravatar". This eventually fails as we have not defined our gravatar class.
+To make the test to pass, we can pass a class="gravatar" to our gravatar_image_tag method: 
+gravatar_image_tag @user.email, :class => 'gravatar'
 
+But, it is better to define a helper method where these default values and options can be set:
+module UsersHelper
+	def gravatar_for(user, options = {:size => 50})
+		gravatar_image_tag(user.email.downcase, :alt => user.name, :class => "gravatar", :gravatar => options)
+	end
+end
 
+We have used an options hash to set some default values for our gravatar. We could look up the API for more. Gravatars are squares so a size value suffices.
+We use our method in our helper: <%= gravatar_for @user%>. Note we did not pass the size parameter; it was set by default for us.
 
-
-
-
-
-
-
+Note: To update a record using the console:
+rails c
+User.first.update_attributes(:email => "yovan.juggoo@gmail.com", :password => "foobar", :password_confirmation => "foobar")
 
 
 
