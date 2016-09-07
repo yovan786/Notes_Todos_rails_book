@@ -864,13 +864,26 @@ get :show, :id => some_id
 
 We don't have any users in our test database. We'll use factories to add users to the test database.
 We could use User.create! to define our users, but factories are more convenient.
-We will use FactoryGirl.
+We will use FactoryGirl. 
+In the Gemfile: add gem 'factory_girl_rails', '1.0' inside our test group.
+bundle install
+To automatically load our data inside our tests we use a file called factories.rb inside our spec directory.
+In the line Factory.define :user do |user|, factory girl knows, by looking at the symbol :user, that we want to use the User class.
 
+In the users_controller_spec.rb, first of all we create a user in the before:each block using FactoryGirl.
+@user = Factory(:user). In this line, we could have passed a hash to the Factory constructor. It uses the default values defined in fatories.rb.
 
+Then we test for response if successful for :show action: 
+get :show, :id => @user.id #we could also use get :show, :id => @user as rails knows that it must pass the id of the @user object.
+response.should be_success
 
-
-
-
+We want to test whether the user we pull out of the DB using the :show action is the real user.
+1. We comment the line #@user = User.find(params[:id]) in the show action method, so that our test fails at first.
+2. Then we write the test "should find the right user"
+a. First of all we get the user by passing it the user previously defined by FactoryGirl.
+b. We use the assign method to test wheter the user passed to the show method is the user we get as output. assigns(:user) is @user in the UsersController.
+The test should fail at first because we commented the line.
+By uncommenting the commented line, we are green.
 
 
 

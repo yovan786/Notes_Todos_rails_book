@@ -4,9 +4,18 @@ describe UsersController do
   render_views
 
   describe "GET 'show'" do
+    before:each do
+      @user = Factory(:user)
+    end
+
     it "returns http success" do
-      get :show
+      get :show, :id => @user.id #we could also use get :show, :id => @user as rails knows that it must pass the id of the @user object.
       response.should be_success
+    end
+
+    it "should find the right user" do
+      get :show, :id => @user
+      assigns(:user).should == @user
     end
 
   end
