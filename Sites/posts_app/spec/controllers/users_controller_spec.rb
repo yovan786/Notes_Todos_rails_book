@@ -52,7 +52,6 @@ describe UsersController do
   end
 
   describe "POST 'create'" do
-
     describe "failure" do
       before:each do
         @invalid_user_hash = { :name => "", :email => "", :password => "", :password_confirmation => "" }
@@ -73,7 +72,65 @@ describe UsersController do
           post :create, :user => @invalid_user_hash
         end.should_not change(User, :count)
       end
-
     end
+
+    describe "success" do
+      before:each do
+        @valid_user_hash = { :name => "New user", :email => "newuser@example.com", :password => "foobar", :password_confirmation => "foobar" }
+      end
+
+      it "should create a user" do
+        lambda do
+          post :create, :user => @valid_user_hash
+        end.should change(User, :count).by(1)
+      end
+
+      it "should redirect to the user show page" do
+        post :create, :user => @valid_user_hash
+        response.should redirect_to(user_path(assigns(:user)))
+      end
+
+      it "should have a welcome message" do
+        post :create, :user => @valid_user_hash
+        flash[:success].should =~ /welcome to the sample app/i
+      end
+    end
+
+    # it "should sign user in" do
+    #   post :create, :user => @valid_user_hash
+    #   controller.should be_signed_in
+    # end
+  end
+
+  describe "GET 'edit'" do
+    before:each do
+      @user = Factory(:user)
+      controller.test_sign_in(@user)
+    end
+
+    it "should be successful" do
+      get :edit, :id => @user
+      response.should be_success
+    end
+
+    it "should have the right title" do
+      get :edit, :id => @user
+      response.should have_selector('title', :content => "Edit user")
+    end
+
+    it "should have a link to change the Gravatar" do
+      get :edit, :id => @user
+      response.should have_selector("a", :href => "http://gravatar.com/emails", :content => "change")
+    end
+  end
+
+  describe "PUT 'update'" do
+    describe "failure" do
+      before:each do
+        
+      end
+    end
+
+
   end
 end

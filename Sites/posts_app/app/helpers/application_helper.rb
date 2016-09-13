@@ -1,5 +1,4 @@
 module ApplicationHelper
-
   #return an title per page basis
   def title
     base_title = "Ruby on Rails Sample App"

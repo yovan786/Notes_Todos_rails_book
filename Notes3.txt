@@ -801,6 +801,7 @@ First we write a failing test for the salt attribute in the password encryption 
 We need to add a migration for the salt column.
 rails g migration add_salt_to_users salt:string
 rake db:migrate && rake db:test:prepare
+annotate
 rspec spec\models\user_spec.rb
 
 
@@ -1108,8 +1109,167 @@ config.filter_parameters +=[:password]
 This adds the password parameters to the list of parameters to be filtered. We cannot see the password in our logs, exceptions and page debugs.
 We can use a secret_code field and add it to the config.filter_parameters.
 
+We will implement the sign up success page, i.e the user profile page - success_signup_mockup.png.
+In this profile page we can see a welcome flash message.
+- Write tests for the success:
+1. First of all we define a valid user hash in the before:each block.
+2.  We define two failing tests:
+- should create a user and
+- should redirect to the user's show page
+- should have a welcome message
+In our Userscontroller#create method, on successful save of our user, we are not redirecting to any view. If we run our tests, the tests fail as rspec complains that the users/create template is missing. 
+We should do a redirect_to user_path(@user) or simply redirect_to @user. 
+
+Note:
+a. In the "should create a user" test, we are testing if the by posting(i.e saving on success) a valid user, the user count is incremented by one.
+
+b. In the "should redirect to the user's show page", we cannot directly use response.should redirect_to(user_path(@user)) because this does not work in rspec.
+We have to use assigns(:user) to pull out the @user attribute from the controller:
+response.should redirect_to(user_path(assigns(:user)))
+
+By adding the line redirect_to @user in the if @user.save clause, we should be green.
+
+c. Reminder of using a flash
+rails c -s
+flash = { :success => "It worked!", :error => "It failed. :-("}
+
+flash.each do |key, value|
+	puts key
+	puts value
+end
+
+We will globally put a flash for messages in our application, inside application.html.erb.
+Note: Rails implicitely provides us the flash hash. The messages keys are success, notice and error.
+
+The "should have a welcome message test" failing test is green when we add the following line in our controller:
+flash[:success].should =~ /welcome to the sample app/i
+Note: We are using case-insensitive regular expression to do the test. By adding this line, we should be green.
+
+def create
+	@user = User.new(params[:user])
+	if @user.save
+		flash[:success] = "Welcome to the Sample App!"
+		redirect_to @user
+	else
+		@title = "Sign up"
+		render "new"
+	end
+end
+
+The above code can be writte as follows:
+def create
+	@user = User.new(params[:user])
+	if @user.save
+		redirect_to @user, :flash => { :success => "Welcome to the sample App!" } # done in one line
+	else
+		@title = "Sign up"
+		render "new"
+	end
+end
+
+We run our app in the browser and sign up successfully valid users. We did not style our success flash. This is done by blueprint/screen.css
+
+We will now do some integration tests, i.e simulate the click on submit button, etc.
+rails g integration_test users
+
+In the users > signup > failure integration test, we'll simulate going to the sign up page, entering invalid data and clicking on the submit button.
+
+Chapter 9
+==========
+We will redirect to the Sign in page when the user clicks on the Sign in link in the navigation bar - signin_mockup.png.
+When we click on the Sign in button in the Sign in page, a Session resource is created and when we Sign out, the Session is destroyed - we can model the session as a REST resource. A session is a temporary connection between two computers (client machine and server).
+
+rails g controller Sessions new
+rm -rf spec\helpers && rm -rf spec\views
+
+In routes.rb we now have get "sessions/new" which we will change in the future
+http://127.0.0.1:8081/sessions/new
+
+rspec spec\controllers\sessions_controller_spec.rb
+We should be green. We add a "should have the right title test" and consequently set the @title value in the new method of the SessionsController.
+Reminder: We should render_views for the have_selector method to work.
+
+When we click on Sign in link in the navigation, we should be redirected to the Sign in page - we need to define our named route.
+In routes.rb, we replace the get "sessions/new" line, with:
+resources :sessions, :only => [:new, :create, :destroy]
+We have restricted our sessions resources to only the new, create and destroy actions.
+We also add some custom routes:
+match "/signin" :to => "sessions#new"
+match "/signout" :to => "sessions#destroy"
+
+Our sessions routes buy us the following:
+
+Http request 	URL 		Named route 	Action 		Purpose
+=======================================================================================
+GET 			/signin 	signin_path 	new 		page for a new session (sign in)
+POST 			/sessions 	sessions_path 	create 		create a new session
+DELETE 			/signout 	signout_path 	destroy 	delete a session (sign out)
+
+We add an integration test for our /signin path in spec/requests/layout_links_spec.rb when we do http://localhost:8081/signin
+
+Recap:
+1. Create a controller with appropriate actions - views are automatcally created for us.
+2. Add @title attributes to action methods.
+3. Add controller tests for the title selector
+4. Change routes to map to appropriate resources and custom routes
+5. Add integration tests for custom routes: example /signin
+
+We won't have any models for our Sessions - we will use cookie.
+Recap:
+In the sign up form, we used <%= form_for(@user) do |f| %>
+Rails automatically knows that we want to post to the action="/users" by using our User model as reference. 
+In the case of sessions, we don't have a model and hence we must manually tell rails the URL of our action:
+<%= form_for(:session, url => sessions_path)%> for it to map our post to /sessions
+
+If we look at the source code, the can see that using form_for :session buys us name="session[field]".
+
+We also add a New user? Sign up now! link.
+
+If we click on the submit button, we get the following error on the page: Missing template sessions/create, application/create
+
+This is because when we click on the submit button, the create action is run. By default as we don't have a render some_template in the action method, it tries to render the default action method name: create - hence as we can see we have an implicit render :new in our new action method.
+
+If we enter some credentials and click on the submit button, we will get the debug values for the email & password, from the params[:session] hash, which we can use to test whether the correct user is signed in.
+{ :session => { :email => "janedoe@exmple.edu", :password => "foobar" }}
+
+We will use the User.authenticate class method to authenticate the user with the params[:session] hash in our create method in SessionController. 
+Based on the value that is returned, we will handle the redirection. We comment the render new line in our if user.nil? condition, and write a failing test for it.
+The test will complain about the missing sessions/create. If we uncomment the render new line, we are green.
+
+If our user is nil, we will use flash[:error] = "Invalid email/password combination". We can't use the shared/_error_messages_html.erb partial to display the error messages, as we don't have an @session variable.
+If we submit an empty sign in form, we can see our flash message. If we click on another page, we still see our flash message. A flash message should disappear if another request is made. This is not the case here as the flash message persists for one request.
+In the case of the new user create welcome flash message, we are redirect_to to the users/id page which is a new request. In the case of the session user sign in, we are not redirecting, but rendering the page. This does not count as a new request.
+
+We must use flash.now[:error] to persist the flash for the current request only. Blueprint styles our flash message nicely.
+
+We test whether the new template is rendered 
+- If the user's credentials are empty.
+- If it has the Sign in title on error.
+- If we have a flash.now[:error] nessage.
+
+On successful sign in we should redirect to the sign-in success page - signin_success_mockup.png. This ressembles our /users/id show page. As we can see we have a Sign out link instead of Sign in link in our navigation.
+
+If the user is valid, in our sessions#create action, we will sign_in the user and then redirect_to user show page.
+ See ruby_0904.flv
+We write failing tests for
+- Sign in a valid user
+- redirect a valid user to the show page
+
+Our sign in model will keep the user signed in although he closes the browser and comes back. A cookie is written to the user's browser.
+
+The sign_in method is defined in the SessionsHelper module.
+
+Rails provides the cookies object to set cookies in the user's browser.
+
+1. cookies.permanent.signed[:remember_token] = [user.id, user.salt] 
+We will use a permanent secured cookie defined by a hash called signed and key :remember_token and set its value to a two elements array. The first value is the unique id used to retrieve the user from the database and the second one is a string value that identifies the user in a secured way - we can use the salt for the particular user. We hence encrypt the user id in the cookie using the salt.
+
+2. We sign in the user by using the current_user method
+current_user = user
 
 
+Inside tests, we can access the <controlle></controlle>r using the variable controller. The current_user is attached to the conroller.
 
+See ruby_0904.flv end
 
-
+We will implement the user sign out.
